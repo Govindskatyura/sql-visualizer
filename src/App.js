@@ -1,3 +1,4 @@
+import { Button, Container, Input, Stack } from "@chakra-ui/react";
 import { useState } from "react";
 
 function App() {
@@ -10,7 +11,7 @@ function App() {
     console.log(sql);
   }
   return (
-    <div className="App">
+    <Container>
       {/* Section for sql visualization */}
       <div className="sql-visualization">
         <div className="sql-visualization-header">
@@ -21,17 +22,35 @@ function App() {
 
         <div className="sql-visualization-header">
           <h1>Paste SQL</h1>
-          <input
+          <Input
+            variant="outline"
+            placeholder="Outline"
             type="text"
-            className="sql-visualization-input"
             onChange={handleChange}
+            value={sql}
+            size='lg'
           />
-          <button className="sql-visualization-button" onSubmit={handleSubmit}>
-            Submit
-          </button>
+          <Stack spacing={4} mt={3} direction="row" align="center" justifyContent={'center'}>
+            <Button
+              className="sql-visualization-button"
+              onSubmit={handleSubmit}
+              colorScheme="blue"
+              alignContent="center"
+            >
+              Submit
+            </Button>
+            <Button
+              className="sql-visualization-button"
+              onSubmit={handleSubmit}
+              colorScheme="blue"
+              alignContent="center"
+            >
+              Reset
+            </Button>
+          </Stack>
         </div>
       </div>
-    </div>
+    </Container>
   );
 }
 
