@@ -9,10 +9,10 @@ import FileUpload from "./components/FileUpload";
 import { useForm } from "react-hook-form";
 
 const defaultLanguage = (
-  <code>{"javascript" || Object.keys(languages).sort()[10]}</code>
+  "sql"
 );
 const defaultTheme = (
-  <code>{"atomOneDark" || Object.keys(themes).sort()[5]}</code>
+  Object.keys(themes).sort()[0]
 );
 
 export default function App() {
@@ -28,11 +28,15 @@ export default function App() {
   } = useForm();
   return (
     <div className="App">
+      <div className="Visualizer">
+
+      </div>
       <div className="ControlsBox">
         <Dropdown
           defaultTheme={defaultLanguage}
+          value={defaultLanguage}
           onChange={(e) => setLanguage(e.target.value)}
-          data={languages}
+          data={{'sql':languages.sql}}
         />
         <Dropdown
           defaultTheme={defaultTheme}
@@ -49,15 +53,17 @@ export default function App() {
           {input}
         </Highlighter>
       </div>
+      <div className="container">
       <FileUpload
         name="avatar"
-        acceptedFileTypes="image/*"
+        acceptedFileTypes=".txt"
         isRequired={false}
         placeholder="Your avatar"
         control={control}
       >
         New avatar
       </FileUpload>
+      </div>
     </div>
   );
 }
