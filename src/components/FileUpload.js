@@ -1,21 +1,19 @@
 import { Input, FormControl, FormLabel, InputGroup, InputLeftElement, FormErrorMessage, Icon } from "@chakra-ui/react";
 import { FiFile } from "react-icons/fi";
-import { useController } from "react-hook-form";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
-export const FileUpload = ({ name, placeholder, acceptedFileTypes, control, children, isRequired = false }) => {
+export const FileUpload = ({ name, placeholder, acceptedFileTypes, control,showfile, children, isRequired = false }) => {
 	const inputRef = useRef();
-	const {
-		field: { ref, onChange, value, ...inputProps },
-		fieldState: { invalid, isTouched, isDirty },
-	} = useController({
-		name,
-		control,
-		rules: { required: isRequired },
-	});
-
+	const [value,setValue] = useState('');
+	var invalid = false
+	const onChangefun =(e) =>{
+		e.preventDefault();
+		showfile(e)
+		// console.log(e.target.files[0]);
+		setValue(e.target.files[0].name)
+	}
 	return (
-		<FormControl isInvalid={invalid} isRequired>
+		<FormControl isRequired>
 			<FormLabel htmlFor="writeUpFile">{children}</FormLabel>
 			<InputGroup>
 				<InputLeftElement
@@ -23,18 +21,17 @@ export const FileUpload = ({ name, placeholder, acceptedFileTypes, control, chil
 					<Icon as={FiFile} />
 				</InputLeftElement>
 				<input type='file'
-					   onChange={(e) => onChange(e.target.files[0])}
+					   onChange={onChangefun}
 					   accept={acceptedFileTypes}
 					   name={name}
 					   ref={inputRef}
-					   {...inputProps}
 					   style={{display: 'none'}} />
 				<Input
 					placeholder={placeholder || "Your file ..."}
 					onClick={() => inputRef.current.click()}
 					// onChange={(e) => {}}
 					readOnly={true}
-					value={value? value.name:''}
+					value={value}
 				/>
 			</InputGroup>
 			<FormErrorMessage>
