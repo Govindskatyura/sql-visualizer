@@ -26,6 +26,18 @@ export default function App() {
     control,
     formState: { errors, isSubmitting },
   } = useForm();
+
+  const showfile = async(e)=>{
+		e.preventDefault()
+    console.log("sadasd")
+		const reader = new FileReader()
+		reader.onload = async(e)=>{
+			const text = (e.target.result)
+			setInput(text);
+		}
+		reader.readAsText(e.target.files[0])
+	}
+
   return (
     <div className="App">
       <div className="Visualizer">
@@ -48,6 +60,7 @@ export default function App() {
         <Editor
           placeHolder="Type your code here..."
           onChange={(e) => setInput(e.target.value)}
+          value={input}
         />
         <Highlighter language={language} theme={themes[theme]}>
           {input}
@@ -60,6 +73,7 @@ export default function App() {
         isRequired={false}
         placeholder="Your avatar"
         control={control}
+        showfile = {showfile}
       >
         New avatar
       </FileUpload>
