@@ -56,7 +56,7 @@ export default function App() {
           data={themes}
         />
       </div>
-      <div className="PanelsBox">
+      <div className="PanelsBox" style={{maxHeight:'80vh',overflowY:'scroll'}}>
         <Editor
           placeHolder="Type your code here..."
           onChange={(e) => setInput(e.target.value)}
