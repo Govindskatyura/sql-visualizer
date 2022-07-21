@@ -7,48 +7,47 @@ import * as languages from "react-syntax-highlighter/dist/esm/languages/hljs";
 import "./App.css";
 import FileUpload from "./components/FileUpload";
 import { useForm } from "react-hook-form";
+import { Box } from "@chakra-ui/react";
 
-const defaultLanguage = (
-  "sql"
-);
-const defaultTheme = (
-  Object.keys(themes).sort()[0]
-);
+const defaultLanguage = "sql";
+const defaultTheme = Object.keys(themes).sort()[0];
 
 export default function App() {
   const [input, setInput] = useState("");
   const [language, setLanguage] = useState(defaultLanguage);
   const [theme, setTheme] = useState(defaultTheme);
   const {
-    handleSubmit,
-    register,
-    setError,
+    // handleSubmit,
+    // register,
+    // setError,
     control,
-    formState: { errors, isSubmitting },
+    // formState: { errors, isSubmitting },
   } = useForm();
 
-  const showfile = async(e)=>{
-		e.preventDefault()
-    console.log("sadasd")
-		const reader = new FileReader()
-		reader.onload = async(e)=>{
-			const text = (e.target.result)
-			setInput(text);
-		}
-		reader.readAsText(e.target.files[0])
-	}
+  const showfile = async (e) => {
+    e.preventDefault();
+    console.log("sadasd");
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const text = e.target.result;
+      setInput(text);
+    };
+    reader.readAsText(e.target.files[0]);
+  };
 
   return (
     <div className="App">
       <div className="Visualizer">
-
+        <Box bg="red.500" w="100%" p={4} color="white">
+          This is the Visualizer Section
+        </Box>
       </div>
       <div className="ControlsBox">
         <Dropdown
           defaultTheme={defaultLanguage}
           value={defaultLanguage}
           onChange={(e) => setLanguage(e.target.value)}
-          data={{'sql':languages.sql}}
+          data={{ sql: languages.sql }}
         />
         <Dropdown
           defaultTheme={defaultTheme}
@@ -56,7 +55,10 @@ export default function App() {
           data={themes}
         />
       </div>
-      <div className="PanelsBox" style={{maxHeight:'80vh',overflowY:'scroll'}}>
+      <div
+        className="PanelsBox"
+        style={{ maxHeight: "80vh", overflowY: "scroll" }}
+      >
         <Editor
           placeHolder="Type your code here..."
           onChange={(e) => setInput(e.target.value)}
@@ -67,16 +69,16 @@ export default function App() {
         </Highlighter>
       </div>
       <div className="container">
-      <FileUpload
-        name="avatar"
-        acceptedFileTypes=".txt"
-        isRequired={false}
-        placeholder="Your avatar"
-        control={control}
-        showfile = {showfile}
-      >
-        New avatar
-      </FileUpload>
+        <FileUpload
+          name="avatar"
+          acceptedFileTypes=".txt"
+          isRequired={false}
+          placeholder="Your avatar"
+          control={control}
+          showfile={showfile}
+        >
+          New avatar
+        </FileUpload>
       </div>
     </div>
   );
