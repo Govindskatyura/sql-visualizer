@@ -7,7 +7,7 @@ import * as languages from "react-syntax-highlighter/dist/esm/languages/hljs";
 import "./App.css";
 import FileUpload from "./components/FileUpload";
 import { useForm } from "react-hook-form";
-import { Box } from "@chakra-ui/react";
+import { Box, Stack } from "@chakra-ui/react";
 
 const defaultLanguage = "sql";
 const defaultTheme = Object.keys(themes).sort()[0];
@@ -38,8 +38,11 @@ export default function App() {
   return (
     <div className="App">
       <div className="Visualizer">
-        <Box bg="red.500" w="100%" p={4} color="white">
-          This is the Visualizer Section
+        <Box bg="red.500" w="100%" p={4} color="#f0f0f0" pb={2}>
+          <Stack direction={'row'}>
+            {input.split(' ').map((text,index)=>
+            <Box bg='green.100' key={index} p={4} color='black'>{text}</Box>)}
+          </Stack>
         </Box>
       </div>
       <div className="ControlsBox">
