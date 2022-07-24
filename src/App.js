@@ -7,7 +7,7 @@ import * as languages from "react-syntax-highlighter/dist/esm/languages/hljs";
 import "./App.css";
 import FileUpload from "./components/FileUpload";
 import { useForm } from "react-hook-form";
-import { Box, Grid, Stack } from "@chakra-ui/react";
+import { Box, Grid } from "@chakra-ui/react";
 
 const defaultLanguage = "sql";
 const defaultTheme = Object.keys(themes).sort()[0];
@@ -74,7 +74,7 @@ export default function App() {
       <div className="container">
         <FileUpload
           name="avatar"
-          acceptedFileTypes=".txt"
+          acceptedFileTypes=".sql"
           isRequired={false}
           placeholder="Your avatar"
           control={control}
