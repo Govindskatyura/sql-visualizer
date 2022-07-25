@@ -12,6 +12,18 @@ import { Box, Grid } from "@chakra-ui/react";
 const defaultLanguage = "sql";
 const defaultTheme = Object.keys(themes).sort()[0];
 
+function Sql(key, text) {
+  return (
+    <Grid display={"flex"} overflow={"scroll"} mt={2}>
+      {text.split(" ").map((text, index) => (
+        <Box bg="green.100" key={index} p={4} ml={1} color="black">
+          {text}
+        </Box>
+      ))}
+    </Grid>
+  );
+}
+
 export default function App() {
   const [input, setInput] = useState("");
   const [language, setLanguage] = useState(defaultLanguage);
@@ -39,10 +51,10 @@ export default function App() {
     <div className="App">
       <div className="Visualizer">
         <Box bg="red.500" w="100%" p={4} color="#f0f0f0" pb={2}>
-          <Grid display={'flex'} overflow={'scroll'}>
-            {input.split(' ').map((text,index)=>
-            <Box bg='green.100' key={index} p={4} color='black'>{text}</Box>)}
-          </Grid>
+          {input
+            .split(";")
+            .map((query, index) => Sql(index,query))
+            }
         </Box>
       </div>
       <div className="ControlsBox">
