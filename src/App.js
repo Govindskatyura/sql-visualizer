@@ -12,10 +12,15 @@ import { Box, Grid } from "@chakra-ui/react";
 const defaultLanguage = "sql";
 const defaultTheme = Object.keys(themes).sort()[0];
 
+function getColumnNames(input) {
+  return (/\bselect\b\s+([\S\s]+?)from/i.exec(input) || [,""])[1].split(/\s*,\s*/g);
+}
+
 function Sql(key, text) {
+  var columns = getColumnNames(text);
   return (
     <div style={{display:'flex',marginBottom:"4px"}}>
-      {text.split(" ").map((text, index) => {
+      {columns.map((text, index) => {
         if (
           text.trim().toLowerCase() !== "select" &&
           text.toLowerCase() !== ""
