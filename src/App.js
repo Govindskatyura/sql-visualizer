@@ -19,14 +19,14 @@ function getColumnNames(input) {
 function Sql(key, text) {
   var columns = getColumnNames(text);
   return (
-    <div style={{display:'flex',marginBottom:"4px"}}>
+    <div style={{display:'flex',marginBottom:"4px"}} className="arrow-steps clearfix">
       {columns.map((text, index) => {
         if (
           text.trim().toLowerCase() !== "select" &&
           text.toLowerCase() !== ""
         ) {
           return (
-            <Box bg="green.100" key={index} p={4} ml={1} color="black">
+            <Box bg="green.100" key={index} color="black" className="step">
               {text}
             </Box>
           );
