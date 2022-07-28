@@ -13,25 +13,66 @@ const defaultLanguage = "sql";
 const defaultTheme = Object.keys(themes).sort()[0];
 
 function getColumnNames(input) {
-  return (/\bselect\b\s+([\S\s]+?)from/i.exec(input) || [,""])[1].split(/\s*,\s*/g);
+  return (/\bselect\b\s+([\S\s]+?)from/i.exec(input) || [, ""])[1].split(
+    /\s*,\s*/g
+  );
 }
 
+function getTableNames(input) {
+  // function takes a sql query and returns an array of table names
+  // var aliases = sql.match(/(?<=\b(?:from|join) )\w+(?: (?!\bjoin\b)\w+)?/g);
+  var aliases = input.match(/(?<=\b(?:from|join) )\w+(?: (?!\bjoin\b)\w+)?/g);
+  if (aliases === null) {
+    return [];
+  }
+  var TableMap = {};
+  aliases.forEach((alias) => {
+    var splited = alias.trim().split(" ");
+    if (splited.length === 1) {
+      TableMap[alias] = alias;
+    } else {
+      TableMap[splited[1]] = splited[0];
+    }
+  });
+  return TableMap;
+}
+
+function random(number) {
+  return Math.floor(Math.random() * number);
+}
+function randomColor() {
+  return "rgb(" + random(255) + "," + random(255) + "," + random(255) + ")";
+}
+let colors = {};
 function Sql(key, text) {
   var columns = getColumnNames(text);
+  var tables = getTableNames(text);
+  // make a random color for each table as a dictionary
+  Object.keys(tables).forEach((table) => {
+    if(!colors[table]){
+    colors[table] = randomColor();
+    }
+   }
+  );
+  var total_tables = Object.keys(tables).length;
+  var first_table = Object.keys(tables)[0];
+  console.log(colors);
   return (
-    <div style={{display:'flex',marginBottom:"4px"}} className="arrow-steps clearfix">
+    <div
+      style={{ display: "flex", marginBottom: "4px" }}
+      className="arrow-steps clearfix"
+    >
       {columns.map((text, index) => {
         if (
           text.trim().toLowerCase() !== "select" &&
           text.toLowerCase() !== ""
         ) {
           return (
-            <Box bg="green.100" key={index} color="black" className="step">
+            <Box backgroundColor={colors[total_tables===1?first_table: text.split(".")[0]]} key={index} color="Green" className="step">
               {text}
             </Box>
           );
-        }
-        else return(<></>)
+        } else return <></>;
       })}
     </div>
   );
