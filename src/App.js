@@ -8,6 +8,7 @@ import "./App.css";
 import FileUpload from "./components/FileUpload";
 import { useForm } from "react-hook-form";
 import { Box, Grid } from "@chakra-ui/react";
+import Tablebox from "./components/Tablebox";
 
 const defaultLanguage = "sql";
 const defaultTheme = Object.keys(themes).sort()[0];
@@ -31,7 +32,7 @@ function getTableNames(input) {
     if (splited.length === 1) {
       TableMap[alias] = alias;
     } else {
-      TableMap[splited[1]] = splited[0];
+      TableMap[splited[0]] = splited[1];
     }
   });
   return TableMap;
@@ -43,20 +44,22 @@ function random(number) {
 function randomColor() {
   return "rgb(" + random(255) + "," + random(255) + "," + random(255) + ")";
 }
-let colors = {};
-function Sql(key, text) {
+function Sql(key, text,colors,handlesetColors) {
   var columns = getColumnNames(text);
   var tables = getTableNames(text);
+  var alias = {};
+  for (var table in tables) {
+    alias[tables[table]] = table;
+  }
   // make a random color for each table as a dictionary
   Object.keys(tables).forEach((table) => {
     if(!colors[table]){
-    colors[table] = randomColor();
+    handlesetColors(table,randomColor());
     }
    }
   );
   var total_tables = Object.keys(tables).length;
   var first_table = Object.keys(tables)[0];
-  console.log(colors);
   return (
     <div
       style={{ display: "flex", marginBottom: "4px" }}
@@ -68,7 +71,7 @@ function Sql(key, text) {
           text.toLowerCase() !== ""
         ) {
           return (
-            <Box backgroundColor={colors[total_tables===1?first_table: text.split(".")[0]]} key={index} color="Green" className="step">
+            <Box backgroundColor={colors[total_tables===1?first_table: alias[text.split(".")[0]]]} key={index} color="#fff" className="step">
               {text}
             </Box>
           );
@@ -82,6 +85,11 @@ export default function App() {
   const [input, setInput] = useState("");
   const [language, setLanguage] = useState(defaultLanguage);
   const [theme, setTheme] = useState(defaultTheme);
+  const [colors , setColors] = useState({});
+  const handlesetColors = (table, color) => {
+    setColors({...colors, [table]: color});
+  }
+
   const {
     // handleSubmit,
     // register,
@@ -104,9 +112,20 @@ export default function App() {
   return (
     <div className="App">
       <div className="Visualizer">
-        <Box bg="red.500" w="100%" p={4} color="#f0f0f0" pb={2}>
-          <Grid overflow={"scroll"} mt={2}>
-            {input.split(";").map((query, index) => Sql(index, query))}
+        <Box bg="#f0f0f0" w="100%" maxHeight={'300px'}  overflow={'scroll'} p={4} color="#f0f0f0" pb={2}>
+          <Grid mt={2}>
+              <Grid item display={'flex'}>
+                {Object.keys(colors).map((table,index) => {
+                  return (
+                    <Box key={table} backgroundColor={colors[table]} color="#fff" p={1} borderRadius={4} m={1} px={4} h={8} textAlign='center' justifyContent={'center'}>
+                      {table}
+                    </Box>
+                  );}
+                )}
+              </Grid>
+              <Grid item>
+            {input.split(";").map((query, index) => Sql(index, query,colors,handlesetColors))}
+            </Grid>
           </Grid>
         </Box>
       </div>
