@@ -30,9 +30,9 @@ function getTableNames(input) {
   aliases.forEach((alias) => {
     var splited = alias.trim().split(" ");
     if (splited.length === 1) {
-      TableMap[alias] = alias;
+      TableMap[alias.toLowerCase()] = alias.toLowerCase();
     } else {
-      TableMap[splited[0]] = splited[1];
+      TableMap[splited[0].toLowerCase()] = splited[1].toLowerCase();
     }
   });
   return TableMap;
@@ -44,6 +44,8 @@ function random(number) {
 function randomColor() {
   return "rgb(" + random(255) + "," + random(255) + "," + random(255) + ")";
 }
+
+// sql query parser
 function Sql(key, text,colors,handlesetColors) {
   var columns = getColumnNames(text);
   var tables = getTableNames(text);
@@ -71,7 +73,7 @@ function Sql(key, text,colors,handlesetColors) {
           text.toLowerCase() !== ""
         ) {
           return (
-            <Box backgroundColor={colors[total_tables===1?first_table: alias[text.split(".")[0]]]} key={index} color="#fff" className="step">
+            <Box backgroundColor={colors[total_tables===1?first_table: alias[text.split(".")[0].toLowerCase()]]} key={index} color="#fff" className="step">
               {text}
             </Box>
           );
@@ -90,13 +92,8 @@ export default function App() {
     setColors({...colors, [table]: color});
   }
 
-  const {
-    // handleSubmit,
-    // register,
-    // setError,
-    control,
-    // formState: { errors, isSubmitting },
-  } = useForm();
+  const {control} = useForm();
+  const last_index = input.lastIndexOf(";");
 
   const showfile = async (e) => {
     e.preventDefault();
@@ -124,7 +121,7 @@ export default function App() {
                 )}
               </Grid>
               <Grid item>
-            {input.split(";").map((query, index) => Sql(index, query,colors,handlesetColors))}
+                {input.slice(0,last_index).split(";").map((query, index) => Sql(index, query,colors,handlesetColors))}
             </Grid>
           </Grid>
         </Box>
@@ -164,7 +161,7 @@ export default function App() {
           control={control}
           showfile={showfile}
         >
-          New avatar
+         SQL FILE
         </FileUpload>
       </div>
     </div>
