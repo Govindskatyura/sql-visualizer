@@ -75,6 +75,10 @@ user-select: none;
 transition: background-color 0.2s ease;
 }
 
+.arrow-steps .step:hover {
+  box-shadow: 0 0 10px rgba(99, 83, 83, 0.5);
+} 
+
 .arrow-steps .step:after,
 .arrow-steps .step:before {
 content: " ";
@@ -83,9 +87,9 @@ top: 0;
 right: -17px;
 width: 0;
 height: 0;
-border-top: 19px solid transparent;
+border-top: 23px solid transparent;
 border-bottom: 17px solid transparent;
-border-left: 17px solid #d9e3f7;	
+border-left: 17px solid #435371;	
 z-index: 2;
 transition: border-color 0.2s ease;
 }
@@ -93,7 +97,7 @@ transition: border-color 0.2s ease;
 .arrow-steps .step:before {
 right: auto;
 left: 0;
-border-left: 17px solid #fff;	
+border-left: 17px solid rgb(236, 215, 215);	
 z-index: 0;
 }
 
