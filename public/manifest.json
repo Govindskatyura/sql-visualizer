@@ -1,0 +1,28 @@
+{
+  "short_name": "SQL Visualizer",
+  "name": "SQL Visualizer — Column-Level SQL Lineage",
+  "description": "Trace any field in a long SQL script back to the table it came from, through CTEs, subqueries and CREATE TABLE AS chains.",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "16x16 32x32 48x48",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#0a0a0a",
+  "background_color": "#0a0a0a"
+}

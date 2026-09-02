@@ -1,22 +1,41 @@
 {
   "name": "sql-visualizer",
   "version": "0.1.0",
-  "homepage": "https://gitname.github.io/sql-visualizer",
+  "description": "Column-level SQL lineage: trace any field in a long SQL script back to the table it came from, through CTEs, subqueries and CREATE TABLE AS chains.",
+  "homepage": "https://govindskatyura.github.io/sql-visualizer",
+  "keywords": [
+    "sql",
+    "sql-lineage",
+    "column-level-lineage",
+    "data-lineage",
+    "sql-parser",
+    "sql-visualizer",
+    "cte",
+    "bigquery",
+    "snowflake",
+    "dbt"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Govindskatyura/sql-visualizer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Govindskatyura/sql-visualizer/issues"
+  },
+  "license": "MIT",
+  "author": "Govind Singh",
   "private": true,
   "dependencies": {
-    "@chakra-ui/react": "^2.2.3",
-    "@emotion/react": "^11.9.3",
-    "@emotion/styled": "^11.9.3",
+    "@codemirror/lang-sql": "^6.10.0",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.3.0",
     "@testing-library/user-event": "^13.5.0",
-    "framer-motion": "^6.4.3",
+    "@uiw/react-codemirror": "^4.25.11",
+    "node-sql-parser": "^5.4.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-hook-form": "^7.33.1",
-    "react-icons": "^4.4.0",
     "react-scripts": "^5.0.0",
-    "react-syntax-highlighter": "^15.5.0",
+    "reactflow": "^11.11.4",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

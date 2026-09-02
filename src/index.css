@@ -1,13 +1,106 @@
+/* Design tokens (see .claude/skills/ui-ux.md).
+   Adaptation for this app: the reference hairline (#e5e5e5 at 1px) is tuned for
+   a marketing page with few borders. This is an information-dense tool with
+   hundreds of chips on screen, so hairlines are used at low alpha; the token
+   keeps the reference value for the rare full-strength edge. */
+
+:root {
+  --color-void-canvas: #0a0a0a;
+  --color-graphite: #161616;
+  --color-elevated: #1d1d1d;
+  --color-frosted-glass: rgba(212, 212, 212, 0.06);
+  --color-snow-white: #ffffff;
+  --color-bone: #ededed;
+  --color-ash: #c2c2c2;
+  --color-slate: #686868;
+  --color-smoke: #b2b2b2;
+  --color-hairline: #e5e5e5;
+  --color-dusk-violet: #6b62f2;
+
+  --hairline: 1px solid rgba(229, 229, 229, 0.12);
+  --hairline-strong: 1px solid rgba(229, 229, 229, 0.22);
+  --gradient-dusk-violet: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0),
+    rgba(0, 0, 0, 0) 40%,
+    rgba(107, 98, 242, 0.565) 50%,
+    rgba(0, 0, 0, 0) 60%,
+    rgba(0, 0, 0, 0)
+  );
+
+  --font-dm-sans: "DM Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-geist: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+  --text-caption: 13px;
+  --text-body: 16px;
+  --text-subheading: 18px;
+  --text-heading-sm: 24px;
+
+  --spacing-4: 4px;
+  --spacing-6: 6px;
+  --spacing-8: 8px;
+  --spacing-10: 10px;
+  --spacing-12: 12px;
+  --spacing-16: 16px;
+  --spacing-20: 20px;
+  --spacing-24: 24px;
+  --spacing-32: 32px;
+
+  --radius-icons: 4px;
+  --radius-ui: 10px;
+  --radius-cards: 24px;
+  --radius-buttons: 9999px;
+
+  color-scheme: dark;
+}
+
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-  
-  body {
-    width: 100vw;
-    min-height: 100vh;
-    font-family: sans-serif;
-    background-color: #ffdee9;
-    background-image: linear-gradient(0deg, #ffdee9 0%, #b5fffc 100%);
-  }
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-void-canvas);
+  color: var(--color-bone);
+  font-family: var(--font-dm-sans);
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0.025em;
+  -webkit-font-smoothing: antialiased;
+}
+
+code,
+pre {
+  font-family: var(--font-mono);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(229, 229, 229, 0.14);
+  border-radius: var(--radius-buttons);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(229, 229, 229, 0.24);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-dusk-violet);
+  outline-offset: 2px;
+}

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="SQL Visualizer">
+  <title>SQL Visualizer</title>
+  <!-- A table with one column traced in the app's violet accent: the product in
+       one glyph. Deliberately not a node-and-edge graph, which at favicon size
+       is indistinguishable from the universal "share" icon. Shapes are kept
+       chunky so the table still reads at 16px. The white ground keeps it
+       visible on both light and dark browser tab bars. -->
+  <rect width="32" height="32" rx="7" fill="#ffffff" />
+  <!-- traced column, drawn under the grid so the strokes frame it -->
+  <rect x="13.2" y="13" width="5.6" height="11" fill="#6b62f2" />
+  <g fill="none" stroke="#0a0a0a" stroke-width="2.5" stroke-linejoin="round">
+    <rect x="6.25" y="7.25" width="19.5" height="17.5" rx="2.75" />
+    <path d="M6.25 13h19.5" />
+  </g>
+</svg>
