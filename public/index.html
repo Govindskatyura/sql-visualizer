@@ -3,20 +3,100 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <title>SQL Visualizer</title>
+    <meta name="theme-color" content="#0a0a0a" />
+
+    <!-- SVG first for browsers that take it (sharp at any size); .ico is the
+         fallback and is also what Google Search looks for. -->
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" sizes="16x16 32x32 48x48" />
+    <link rel="icon" type="image/svg+xml" href="%PUBLIC_URL%/favicon.svg" />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/apple-touch-icon.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+
+    <title>SQL Visualizer — Column-Level SQL Lineage in Your Browser</title>
+    <meta
+      name="description"
+      content="Paste a long SQL script and trace any field back to the table it came from. Column-level lineage through CTEs, subqueries, UNIONs and CREATE TABLE AS chains, for BigQuery, Snowflake, Postgres, MySQL, Hive and more. Free, open source, runs entirely in your browser."
+    />
+    <link rel="canonical" href="https://govindskatyura.github.io/sql-visualizer/" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="author" content="Govind Singh" />
+
+    <!-- Open Graph / Twitter: controls how the link renders when shared, and
+         gives crawlers a second, consistent description of the page. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="SQL Visualizer" />
+    <meta property="og:title" content="SQL Visualizer — Column-Level SQL Lineage in Your Browser" />
+    <meta
+      property="og:description"
+      content="Trace any field in a long SQL script back to the table it came from — through CTEs, subqueries and CREATE TABLE AS chains. Supports BigQuery, Snowflake, Postgres, MySQL, Hive and more."
+    />
+    <meta property="og:url" content="https://govindskatyura.github.io/sql-visualizer/" />
+    <meta property="og:image" content="https://govindskatyura.github.io/sql-visualizer/og-image.png" />
+    <meta property="og:image:alt" content="SQL Visualizer tracing a field through a SQL pipeline" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="SQL Visualizer — Column-Level SQL Lineage in Your Browser" />
+    <meta
+      name="twitter:description"
+      content="Trace any field in a long SQL script back to the table it came from — through CTEs, subqueries and CREATE TABLE AS chains."
+    />
+    <meta name="twitter:image" content="https://govindskatyura.github.io/sql-visualizer/og-image.png" />
+
+    <!-- Structured data: lets Google understand this as a free web application
+         rather than an unlabelled page, which is what enables the richer result. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "SQL Visualizer",
+        "alternateName": "SQL Lineage Visualizer",
+        "applicationCategory": "DeveloperApplication",
+        "applicationSubCategory": "Data Lineage Tool",
+        "operatingSystem": "Any (web browser)",
+        "url": "https://govindskatyura.github.io/sql-visualizer/",
+        "description": "Column-level SQL lineage in the browser. Trace any field in a long SQL script back to the table it came from, through CTEs, subqueries, UNIONs and CREATE TABLE AS chains.",
+        "featureList": [
+          "Column-level lineage tracing across statements",
+          "Field origin highlighting per source table",
+          "Interactive lineage graph (DAG)",
+          "CTE, subquery and UNION resolution",
+          "Multi-dialect SQL parsing with auto-detection",
+          "Runs entirely client-side — SQL never leaves the browser"
+        ],
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "codeRepository": "https://github.com/Govindskatyura/sql-visualizer",
+        "license": "https://opensource.org/licenses/MIT",
+        "isAccessibleForFree": true,
+        "author": {
+          "@type": "Person",
+          "name": "Govind Singh"
+        }
+      }
+    </script>
+
   </head>
   <body>
     <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
-
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
-
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
+    <noscript>
+      <h1>SQL Visualizer — column-level SQL lineage</h1>
+      <p>
+        SQL Visualizer traces any field in a long SQL script back to the table it came from,
+        through CTEs, subqueries, UNION branches and CREATE TABLE AS chains. It shows the
+        expression that produced the value at every hop, so you can see both where a column
+        comes from and how it was derived.
+      </p>
+      <p>
+        It supports BigQuery, Snowflake, PostgreSQL, MySQL, MariaDB, Redshift, Hive, Flink SQL,
+        Trino/Presto, Athena, SQLite, T-SQL and Db2, with automatic dialect detection, and runs
+        entirely in your browser — your SQL is never uploaded.
+      </p>
+      <p>
+        This application requires JavaScript. Source code and documentation are available at
+        <a href="https://github.com/Govindskatyura/sql-visualizer">github.com/Govindskatyura/sql-visualizer</a>.
+      </p>
+    </noscript>
   </body>
 </html>

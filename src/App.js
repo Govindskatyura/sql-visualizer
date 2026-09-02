@@ -1,100 +1,109 @@
-import React, { useState } from "react";
-import { Dropdown } from "./components/Dropdown";
-import { Editor } from "./components/Editor";
-import { Highlighter } from "./components/Highlighter";
-import * as themes from "react-syntax-highlighter/dist/esm/styles/hljs";
-import * as languages from "react-syntax-highlighter/dist/esm/languages/hljs";
+import { useCallback, useDeferredValue, useMemo, useRef, useState } from "react";
+
+import Toolbar from "./components/Toolbar";
+import SqlEditor from "./components/SqlEditor";
+import StatementView from "./components/StatementView";
+import GraphView from "./components/GraphView";
+import TracePanel from "./components/TracePanel";
+
+import { parseScript } from "./lineage/parse";
+import { buildLineage, computeOriginIndex } from "./lineage/graph";
+import { AUTO } from "./lineage/dialects";
+import { SAMPLE_SQL } from "./sample";
 import "./App.css";
-import FileUpload from "./components/FileUpload";
-import { useForm } from "react-hook-form";
-import { Box, Grid } from "@chakra-ui/react";
-import Sql from "./components/Sql";
-
-const defaultLanguage = "sql";
-const defaultTheme = Object.keys(themes).sort()[0];
-
 
 export default function App() {
-  const [input, setInput] = useState("");
-  const [language, setLanguage] = useState(defaultLanguage);
-  const [theme, setTheme] = useState(defaultTheme);
-  const [colors , setColors] = useState({});
-  const handlesetColors = (table, color) => {
-    setColors({...colors, [table]: color});
-  }
+  const [sql, setSql] = useState(SAMPLE_SQL);
+  const [dialect, setDialect] = useState(AUTO);
+  const [view, setView] = useState("statements");
+  const [selection, setSelection] = useState(null);
+  const [search, setSearch] = useState("");
 
-  const {control} = useForm();
-  const last_index = input.lastIndexOf(";");
+  const editorRef = useRef(null);
 
-  const showfile = async (e) => {
-    e.preventDefault();
-    console.log("sadasd");
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const text = e.target.result;
-      setInput(text);
-    };
-    reader.readAsText(e.target.files[0]);
-  };
+  // Keeps typing responsive: parsing runs against the settled value while the
+  // editor stays on the latest keystroke.
+  const deferredSql = useDeferredValue(sql);
+
+  const parsed = useMemo(() => parseScript(deferredSql, dialect), [deferredSql, dialect]);
+  const graph = useMemo(() => buildLineage(parsed), [parsed]);
+  const originIndex = useMemo(() => computeOriginIndex(graph), [graph]);
+
+  const handleJumpToLine = useCallback((line) => {
+    editorRef.current?.revealLine(line);
+  }, []);
+
+  const handleSelect = useCallback((next) => {
+    setSelection((current) =>
+      current && current.nodeId === next.nodeId && current.column === next.column ? null : next
+    );
+  }, []);
+
+  const handleLoad = useCallback((text) => {
+    setSql(text);
+    setSelection(null);
+  }, []);
+
+  const isStale = sql !== deferredSql;
 
   return (
-    <div className="App">
-      <div className="Visualizer">
-        <Box bg="#f0f0f0" w="100%" maxHeight={'300px'}  overflow={'scroll'} p={4} color="#f0f0f0" pb={2}>
-          <Grid mt={2}>
-              <Grid item display={'flex'}>
-                {Object.keys(colors).map((table,index) => {
-                  return (
-                    <Box key={table} backgroundColor={colors[table]} color="#fff" p={1} borderRadius={4} m={1} px={4} h={8} textAlign='center' justifyContent={'center'}>
-                      {table}
-                    </Box>
-                  );}
-                )}
-              </Grid>
-              <Grid item>
-                {input.slice(0,last_index).split(";").map((query, index) => Sql(index, query,colors,handlesetColors))}
-            </Grid>
-          </Grid>
-        </Box>
-      </div>
-      <div className="ControlsBox">
-        <Dropdown
-          defaultTheme={defaultLanguage}
-          value={defaultLanguage}
-          onChange={(e) => setLanguage(e.target.value)}
-          data={{ sql: languages.sql }}
-        />
-        <Dropdown
-          defaultTheme={defaultTheme}
-          onChange={(e) => setTheme(e.target.value)}
-          data={themes}
-        />
-      </div>
-      <div
-        className="PanelsBox"
-        style={{ maxHeight: "80vh", overflowY: "scroll" }}
-      >
-        <Editor
-          placeHolder="Type your code here..."
-          onChange={(e) => setInput(e.target.value)}
-          value={input}
-        />
-        <Highlighter language={language} theme={themes[theme]}>
-          {input}
-        </Highlighter>
-      </div>
-      <div className="container">
-        <FileUpload
-          name="avatar"
-          acceptedFileTypes=".sql"
-          isRequired={false}
-          placeholder="Your avatar"
-          control={control}
-          showfile={showfile}
-        >
-         SQL FILE
-        </FileUpload>
-      </div>
+    <div className="app">
+      <Toolbar
+        dialect={dialect}
+        onDialectChange={setDialect}
+        resolvedDialect={parsed.dialect}
+        detected={parsed.detected}
+        stats={parsed.stats}
+        view={view}
+        onViewChange={setView}
+        search={search}
+        onSearchChange={setSearch}
+        onLoadFile={handleLoad}
+        onLoadSample={() => handleLoad(SAMPLE_SQL)}
+      />
+
+      <main className={`layout ${selection ? "layout--tracing" : ""}`}>
+        <section className="pane pane--editor">
+          <div className="pane__head">
+            <span className="pane__title">SQL</span>
+            <span className="muted">{sql.split("\n").length} lines</span>
+          </div>
+          <div className="pane__body">
+            <SqlEditor ref={editorRef} value={sql} onChange={setSql} dialect={parsed.dialect} />
+          </div>
+        </section>
+
+        <section className="pane pane--view">
+          <div className={`pane__body pane__body--scroll ${isStale ? "is-stale" : ""}`}>
+            {view === "statements" ? (
+              <StatementView
+                graph={graph}
+                originIndex={originIndex}
+                selection={selection}
+                onSelect={handleSelect}
+                onJumpToLine={handleJumpToLine}
+                search={search}
+              />
+            ) : (
+              <GraphView
+                graph={graph}
+                originIndex={originIndex}
+                selection={selection}
+                onSelect={handleSelect}
+              />
+            )}
+          </div>
+        </section>
+
+        {selection && (
+          <TracePanel
+            graph={graph}
+            selection={selection}
+            onClose={() => setSelection(null)}
+            onJumpToLine={handleJumpToLine}
+          />
+        )}
+      </main>
     </div>
   );
 }
