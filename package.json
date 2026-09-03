@@ -1,7 +1,7 @@
 {
   "name": "sql-visualizer",
   "version": "0.1.0",
-  "description": "Column-level SQL lineage: trace any field in a long SQL script back to the table it came from, through CTEs, subqueries and CREATE TABLE AS chains.",
+  "description": "Column-level SQL and SAS lineage: trace any field in a long script back to the table it came from, through CTEs, subqueries, CREATE TABLE AS chains, DATA steps and PROC SQL.",
   "homepage": "https://govindskatyura.github.io/sql-visualizer",
   "keywords": [
     "sql",
@@ -11,6 +11,9 @@
     "sql-parser",
     "sql-visualizer",
     "cte",
+    "sas",
+    "sas-lineage",
+    "proc-sql",
     "bigquery",
     "snowflake",
     "dbt"

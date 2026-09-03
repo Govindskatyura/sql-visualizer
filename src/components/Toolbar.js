@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { DIALECT_OPTIONS, AUTO, dialectLabel } from "../lineage/dialects";
+import { DIALECTS, LANGUAGES, AUTO, dialectLabel } from "../lineage/dialects";
 
 /**
  * The favicon mark, inline so it inherits the dark theme rather than sitting on
@@ -22,6 +22,7 @@ export default function Toolbar({
   onDialectChange,
   resolvedDialect,
   detected,
+  language,
   stats,
   view,
   onViewChange,
@@ -59,11 +60,23 @@ export default function Toolbar({
             value={dialect}
             onChange={(event) => onDialectChange(event.target.value)}
           >
-            {DIALECT_OPTIONS.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.label}
-              </option>
-            ))}
+            <option value={AUTO}>Auto-detect</option>
+            {/* SAS is a language rather than a dialect -- DATA steps and PROCs
+                are not SQL -- so it is offered apart from the SQL grammars. */}
+            <optgroup label="SQL dialects">
+              {DIALECTS.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.label}
+                </option>
+              ))}
+            </optgroup>
+            <optgroup label="Other languages">
+              {LANGUAGES.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.label}
+                </option>
+              ))}
+            </optgroup>
           </select>
         </label>
 
@@ -75,7 +88,7 @@ export default function Toolbar({
 
         {stats.total > 0 && (
           <span className={`pill ${stats.degraded ? "pill--warn" : "pill--ok"}`}>
-            {stats.parsed}/{stats.total} statements parsed
+            {stats.parsed}/{stats.total} {language === "sas" ? "steps" : "statements"} parsed
           </span>
         )}
       </div>
@@ -109,20 +122,32 @@ export default function Toolbar({
           ))}
         </div>
 
-        <button type="button" className="button button--ghost" onClick={onLoadSample}>
-          Sample
+        <button
+          type="button"
+          className="button button--ghost"
+          onClick={() => onLoadSample("sql")}
+        >
+          SQL sample
+        </button>
+        <button
+          type="button"
+          className="button button--ghost"
+          onClick={() => onLoadSample("sas")}
+        >
+          SAS sample
         </button>
         <button
           type="button"
           className="button button--primary"
           onClick={() => fileRef.current?.click()}
+          title="Open a .sql or .sas file"
         >
-          Open .sql
+          Open file
         </button>
         <input
           ref={fileRef}
           type="file"
-          accept=".sql,.txt"
+          accept=".sql,.sas,.txt"
           onChange={handleFile}
           style={{ display: "none" }}
         />

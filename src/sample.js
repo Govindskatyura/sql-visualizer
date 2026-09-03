@@ -1,4 +1,52 @@
 // Loaded on first run so the app opens with something to look at.
+
+// The same pipeline as SAMPLE_SQL, written the way it would be in SAS: a DATA
+// step, a PROC SORT, a PROC SQL join and a PROC SUMMARY, so every reader the
+// SAS path has is exercised by the sample.
+export const SAMPLE_SAS = `/* Revenue pipeline in SAS: raw orders -> cleaned -> enriched -> reported. */
+/* Click any field chip to trace it back to the dataset it came from.      */
+
+%let raw = ecommerce;
+
+data staging.orders_clean;
+  set &raw..orders (where=(status = 'paid'));
+  order_id = id;
+  amount   = amount_cents / 100;
+  if channel = 'web' then channel_group = 'online';
+  else channel_group = 'retail';
+  drop id amount_cents;
+run;
+
+proc sort data=staging.orders_clean out=staging.orders_sorted;
+  by customer_id;
+run;
+
+proc sql;
+  create table staging.orders_enriched as
+  select o.order_id,
+         o.amount,
+         o.channel_group,
+         c.country,
+         c.signup_date,
+         coalesce(c.segment, 'unknown') as segment
+    from staging.orders_sorted o
+    left join crm.customers c
+      on c.id = o.customer_id;
+quit;
+
+proc summary data=staging.orders_enriched nway;
+  class country segment;
+  var amount;
+  output out=by_country sum(amount)=revenue n(amount)=order_count;
+run;
+
+data revenue_report;
+  set by_country;
+  avg_order_value = revenue / max(order_count, 1);
+  keep country segment revenue order_count avg_order_value;
+run;
+`;
+
 export const SAMPLE_SQL = `-- Revenue pipeline: raw orders -> cleaned -> enriched -> reported.
 -- Click any field chip to trace it back to the table it came from.
 

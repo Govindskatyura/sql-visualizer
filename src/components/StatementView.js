@@ -8,8 +8,12 @@ const KIND_TEXT = {
   insert_select: "INSERT SELECT",
   insert: "INSERT",
   create: "CREATE",
+  data_step: "DATA STEP",
   other: "STATEMENT",
 };
+
+/** SAS contributes a kind per PROC (`proc_sort`), so unknown kinds are titled. */
+const kindText = (kind) => KIND_TEXT[kind] ?? String(kind ?? "").replace(/_/g, " ").toUpperCase();
 
 /**
  * One field. Colour encodes the base table it ultimately comes from, so a
@@ -165,7 +169,7 @@ export default function StatementView({
               >
                 line {statement.startLine}
               </button>
-              <span className="statement__kind">{KIND_TEXT[statement.kind] ?? statement.kind}</span>
+              <span className="statement__kind">{kindText(statement.kind)}</span>
               {statement.target && <span className="statement__target">{statement.target}</span>}
               {statement.degraded && (
                 <span

@@ -20,11 +20,27 @@ export const DIALECTS = [
 
 export const AUTO = "auto";
 
-export const DIALECT_OPTIONS = [{ id: AUTO, label: "Auto-detect" }, ...DIALECTS];
+// SAS is a language, not a SQL dialect: its DATA steps and PROCs have no SQL
+// grammar, and its PROC SQL blocks are parsed with a SQL engine chosen inside
+// the SAS reader. It therefore sits outside DIALECTS -- which is exactly the
+// list of ids node-sql-parser understands -- but is offered in the picker.
+export const SAS = "SAS";
+
+export const LANGUAGES = [{ id: SAS, label: "SAS" }];
+
+export const DIALECT_OPTIONS = [
+  { id: AUTO, label: "Auto-detect" },
+  ...DIALECTS,
+  ...LANGUAGES,
+];
 
 export function dialectLabel(id) {
   if (id === AUTO) return "Auto-detect";
-  return DIALECTS.find((d) => d.id === id)?.label ?? id;
+  return (
+    DIALECTS.find((d) => d.id === id)?.label ??
+    LANGUAGES.find((l) => l.id === id)?.label ??
+    id
+  );
 }
 
 // Syntax fingerprints. Each hit adds to a dialect's score; used to break ties

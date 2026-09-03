@@ -124,11 +124,15 @@ export function buildLineage(parseResult) {
           ? [sourceNodes.get(column.starSource)].filter(Boolean)
           : Array.from(sourceNodes.values());
 
+        // A SAS DATA step drops columns out of an otherwise implicit `*`.
+        const excluded = new Set((column.starExcludes ?? []).map(lower));
+
         for (const targetId of targets) {
           const source = nodes.get(targetId);
           const starColumns = source && source.columns.length ? source.columns : null;
           if (starColumns) {
             for (const c of starColumns) {
+              if (excluded.has(lower(c.name))) continue;
               addColumn(node, c.name, { expression: `${source.name}.${c.name}`, viaStar: true });
               addEdge(targetId, node.id, { to: c.name, from: c.name, expression: "*", viaStar: true });
             }

@@ -9,7 +9,7 @@ import TracePanel from "./components/TracePanel";
 import { parseScript } from "./lineage/parse";
 import { buildLineage, computeOriginIndex } from "./lineage/graph";
 import { AUTO } from "./lineage/dialects";
-import { SAMPLE_SQL } from "./sample";
+import { SAMPLE_SQL, SAMPLE_SAS } from "./sample";
 import "./App.css";
 
 export default function App() {
@@ -44,6 +44,16 @@ export default function App() {
     setSelection(null);
   }, []);
 
+  const handleLoadSample = useCallback(
+    (kind) => {
+      handleLoad(kind === "sas" ? SAMPLE_SAS : SAMPLE_SQL);
+      // A sample is unambiguous, so leave detection to work it out rather than
+      // stranding the user on a dialect they picked for the previous script.
+      setDialect(AUTO);
+    },
+    [handleLoad]
+  );
+
   const isStale = sql !== deferredSql;
 
   return (
@@ -53,19 +63,20 @@ export default function App() {
         onDialectChange={setDialect}
         resolvedDialect={parsed.dialect}
         detected={parsed.detected}
+        language={parsed.language}
         stats={parsed.stats}
         view={view}
         onViewChange={setView}
         search={search}
         onSearchChange={setSearch}
         onLoadFile={handleLoad}
-        onLoadSample={() => handleLoad(SAMPLE_SQL)}
+        onLoadSample={handleLoadSample}
       />
 
       <main className={`layout ${selection ? "layout--tracing" : ""}`}>
         <section className="pane pane--editor">
           <div className="pane__head">
-            <span className="pane__title">SQL</span>
+            <span className="pane__title">{parsed.language === "sas" ? "SAS" : "SQL"}</span>
             <span className="muted">{sql.split("\n").length} lines</span>
           </div>
           <div className="pane__body">

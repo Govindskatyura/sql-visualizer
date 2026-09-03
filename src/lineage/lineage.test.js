@@ -1,6 +1,7 @@
 import { splitStatements, splitTopLevel, findKeyword } from "./scanner";
 import { parseScript } from "./parse";
 import { buildLineage, traceColumn, traceOrigins, computeOriginIndex, primaryOrigin } from "./graph";
+import { SAS } from "./dialects";
 
 const lineage = (sql, dialect = "auto") => buildLineage(parseScript(sql, dialect));
 
@@ -199,6 +200,126 @@ describe("lineage graph", () => {
     // A view that reads a table of the same name resolves to itself.
     const graph = lineage("create view loop as select a from loop_source; select a from loop;");
     expect(() => originsOf(graph, 1, "a")).not.toThrow();
+  });
+});
+
+describe("SAS", () => {
+  const sas = (program) => buildLineage(parseScript(program, SAS));
+
+  test("recognizes a SAS program without being told", () => {
+    const parsed = parseScript("data work.a;\n  set raw.b;\n  x = y + 1;\nrun;", "auto");
+    expect(parsed.language).toBe("sas");
+    expect(parsed.dialect).toBe("SAS");
+  });
+
+  test("does not mistake SQL for SAS", () => {
+    const parsed = parseScript("update t set x = 1 where id = 2; select * from t", "auto");
+    expect(parsed.language).toBe("sql");
+  });
+
+  test("a DATA step names its own variables and carries the rest through", () => {
+    const graph = sas("data work.clean;\n  set raw.orders;\n  amount = cents / 100;\nrun;");
+    // `cents` arrives through the implicit pass-through of every input variable.
+    expect(columnNames(outputOf(graph))).toEqual(["amount", "cents"]);
+    expect(originsOf(graph, 0, "amount")).toEqual([{ table: "raw.orders", column: "cents" }]);
+  });
+
+  test("an assigned variable depends on the condition that chose it", () => {
+    const graph = sas(
+      "data work.a;\n  set raw.b;\n  if kind = 'web' then grp = 'online';\n  else grp = 'retail';\nrun;"
+    );
+    expect(originsOf(graph, 0, "grp")).toEqual([{ table: "raw.b", column: "kind" }]);
+  });
+
+  test("a variable defined earlier in the step is not looked for on the dataset", () => {
+    const graph = sas("data work.a;\n  set raw.b;\n  total = x + y;\n  share = total / n;\nrun;");
+    expect(originsOf(graph, 0, "share")).toEqual([
+      { table: "raw.b", column: "x" },
+      { table: "raw.b", column: "y" },
+      { table: "raw.b", column: "n" },
+    ]);
+  });
+
+  test("KEEP limits the output to the variables it lists", () => {
+    const graph = sas("data work.a;\n  set raw.b;\n  keep id name;\nrun;");
+    expect(columnNames(outputOf(graph))).toEqual(["id", "name"]);
+  });
+
+  test("DROP takes a variable back out of the pass-through", () => {
+    const graph = sas("data work.a;\n  set raw.b;\n  x = id;\n  drop id;\nrun;");
+    expect(columnNames(outputOf(graph))).not.toContain("id");
+  });
+
+  test("RENAME on an input maps the variable back to its name on the dataset", () => {
+    const graph = sas("data work.a;\n  set raw.b (rename=(old_name=new_name));\n  x = new_name;\nrun;");
+    expect(originsOf(graph, 0, "x")).toEqual([{ table: "raw.b", column: "old_name" }]);
+  });
+
+  test("MERGE reports both inputs, narrowed by KEEP", () => {
+    const graph = sas(
+      "data work.a;\n  merge raw.b (keep=id amt) raw.c (keep=id nm);\n  by id;\n  total = amt * 2;\nrun;"
+    );
+    const output = outputOf(graph);
+    expect(output.relation.sources.map((s) => s.name)).toEqual(["raw.b", "raw.c"]);
+    expect(originsOf(graph, 0, "total")).toEqual([{ table: "raw.b", column: "amt" }]);
+  });
+
+  test("resolves a macro variable set with %let", () => {
+    const graph = sas("%let lib = raw;\ndata work.a;\n  set &lib..orders;\n  x = amt;\nrun;");
+    expect(originsOf(graph, 0, "x")).toEqual([{ table: "raw.orders", column: "amt" }]);
+  });
+
+  test("a star comment is not read as code", () => {
+    const graph = sas("* set raw.decoy;\ndata work.a;\n  set raw.b;\nrun;");
+    expect(graph.statements).toHaveLength(1);
+    expect(outputOf(graph).relation.sources.map((s) => s.name)).toEqual(["raw.b"]);
+  });
+
+  test("does not split a statement on a semicolon inside a quoted string", () => {
+    const graph = sas("data work.a;\n  set raw.b;\n  note = 'x;y';\nrun;");
+    expect(graph.statements).toHaveLength(1);
+    expect(columnNames(outputOf(graph))).toContain("note");
+  });
+
+  test("PROC SORT carries its input through to OUT=", () => {
+    const graph = sas(
+      "data work.a;\n  set raw.b;\n  x = c;\nrun;\nproc sort data=work.a out=work.sorted;\n  by x;\nrun;"
+    );
+    expect(graph.statements[1].target).toBe("work.sorted");
+    expect(originsOf(graph, 1, "x")).toEqual([{ table: "raw.b", column: "c" }]);
+  });
+
+  test("PROC SUMMARY maps an output statistic to the variable it summarized", () => {
+    const graph = sas(
+      "proc summary data=raw.sales nway;\n  class region;\n  var amt;\n  output out=work.s sum(amt)=total;\nrun;"
+    );
+    expect(columnNames(outputOf(graph))).toEqual(["total", "region"]);
+    expect(originsOf(graph, 0, "total")).toEqual([{ table: "raw.sales", column: "amt" }]);
+  });
+
+  test("PROC SQL and DATA steps meet on the same WORK dataset", () => {
+    const graph = sas(
+      "proc sql;\n  create table clean as\n  select id, amt / 100 as dollars from raw.orders;\nquit;\n" +
+        "data final;\n  set clean;\nrun;"
+    );
+    expect(graph.statements[0].target).toBe("work.clean");
+    expect(graph.statements[1].target).toBe("work.final");
+    expect(originsOf(graph, 1, "dollars")).toEqual([{ table: "raw.orders", column: "amt" }]);
+  });
+
+  test("CALCULATED resolves to the earlier item in the select list", () => {
+    const graph = sas(
+      "proc sql;\n  create table t as\n  select amt / 100 as dollars, calculated dollars * 0.2 as tax\n" +
+        "  from raw.orders;\nquit;"
+    );
+    expect(originsOf(graph, 0, "tax")).toEqual([{ table: "raw.orders", column: "amt" }]);
+  });
+
+  test("ignores the pass-through SQL of a CONNECT TO block", () => {
+    const graph = sas(
+      "proc sql;\n  connect to oracle as ora (user=x);\n  execute (delete from t) by ora;\n  disconnect from ora;\nquit;"
+    );
+    expect(graph.statements).toHaveLength(0);
   });
 });
 

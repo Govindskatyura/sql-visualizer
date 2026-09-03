@@ -7,7 +7,8 @@
 
 import { Parser } from "node-sql-parser";
 import { splitStatements, splitTopLevel, findKeyword, blankComments } from "./scanner";
-import { DIALECTS, AUTO, detectDialect } from "./dialects";
+import { DIALECTS, AUTO, SAS, detectDialect } from "./dialects";
+import { parseSasScript, looksLikeSas } from "./sas";
 
 const parser = new Parser();
 
@@ -546,7 +547,11 @@ function heuristicStatement(text) {
   return { sources, columns, joins: [], where: null, groupBy: [] };
 }
 
-function parseStatement(statement, dialect) {
+/**
+ * Parses one statement. Exported because the SAS reader hands it the SQL it
+ * finds inside a PROC SQL block.
+ */
+export function parseStatement(statement, dialect) {
   const base = {
     id: uid("stmt"),
     index: statement.index,
@@ -611,9 +616,16 @@ function evenSample(statements, count) {
   return picked;
 }
 
-/** Parses a whole script. `dialect` may be a dialect id or AUTO. */
+/** Parses a whole script. `dialect` may be a dialect id, SAS or AUTO. */
 export function parseScript(sql, dialect = AUTO) {
   nextId = 0;
+
+  // SAS is not a SQL grammar, so it is routed to its own reader before any of
+  // the SQL machinery runs -- splitting a DATA step on SQL rules would mangle it.
+  if (dialect === SAS || (dialect === AUTO && looksLikeSas(sql))) {
+    return parseSasScript(sql, parseStatement);
+  }
+
   const raw = splitStatements(sql).map((s, index) => ({ ...s, index }));
 
   let resolvedDialect = dialect;
@@ -623,6 +635,7 @@ export function parseScript(sql, dialect = AUTO) {
     if (!raw.length) {
       return {
         dialect: "PostgresQL",
+        language: "sql",
         detected: null,
         statements: [],
         stats: { total: 0, parsed: 0, degraded: 0 },
@@ -651,6 +664,7 @@ export function parseScript(sql, dialect = AUTO) {
 
   return {
     dialect: resolvedDialect,
+    language: "sql",
     detected: detection,
     statements,
     stats: {

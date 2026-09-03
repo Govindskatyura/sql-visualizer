@@ -3,6 +3,7 @@ import CodeMirror from "@uiw/react-codemirror";
 import { EditorView } from "@codemirror/view";
 import {
   sql,
+  SQLDialect,
   StandardSQL,
   PostgreSQL,
   MySQL,
@@ -10,6 +11,26 @@ import {
   SQLite,
   MariaSQL,
 } from "@codemirror/lang-sql";
+
+// CodeMirror has no SAS mode. The SQL mode is close enough to be useful once it
+// knows the step and PROC vocabulary: `*`-comments and macro calls still
+// highlight as ordinary text, but keywords, strings and numbers are right.
+const SAS = SQLDialect.define({
+  keywords:
+    "data set merge update modify output run quit proc sql libname filename options " +
+    "by where keep drop rename retain length label format informat array attrib " +
+    "if then else do end while until select when otherwise stop return delete " +
+    "infile input put file datalines cards create table view index insert into " +
+    "as from group having order union outer inner left right full join on distinct " +
+    "class var id copy nway noprint descending calculated append base out title footnote",
+  types: "num char numeric character date datetime time best comma dollar",
+  builtin:
+    "sum mean median min max std n nmiss count first last lag dif abs round int " +
+    "substr scan trim strip compress upcase lowcase cats catx index find tranwrd " +
+    "input put today date datepart timepart intnx intck year month day mdy coalesce ifn ifc",
+  slashComments: true,
+  doubleQuotedStrings: true,
+});
 
 // Our dialect ids are node-sql-parser's; CodeMirror has its own, smaller set.
 // Anything without a close match highlights as standard SQL.
@@ -21,6 +42,7 @@ const CM_DIALECTS = {
   MariaDB: MariaSQL,
   TransactSQL: MSSQL,
   Sqlite: SQLite,
+  SAS,
 };
 
 const editorTheme = EditorView.theme(
